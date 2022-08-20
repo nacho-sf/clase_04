@@ -519,20 +519,46 @@ runButton.addEventListener("click", function(value){
         // Consigue que se imprima por consola el nombre de cada usuario.
 
 
-//////// SIN TERMINAR //////////
 
-let users = ['nacho-sf', 'alejandroereyesb', 'Alenriquez96', 'IvanQGervas', 'JavierEspinosaP'];
-
-let prom1 = fetch("https://api.github.com/users/nacho-sf");
-let prom2 = fetch("https://api.github.com/users/alejandroereyesb");
-let prom3 = fetch("https://api.github.com/users/Alenriquez96");
-let prom4 = fetch("https://api.github.com/users/IvanQGervas");
-let prom5 = fetch("https://api.github.com/users/JavierEspinosaP");
+let names = ['nacho-sf', 'alejandroereyesb', 'Alenriquez96', 'IvanQGervas', 'JavierEspinosaP'];
 
 
-Promise.all([prom1, prom2, prom3, prom4, prom5])
+
+
+let requests = names.map(name => fetch(`https://api.github.com/users/${name}`));
+
+
+
+
+Promise.all(requests)
+
   .then(responses => {
-    responses.forEach(response => {
-      console.log(response.status, response.url);
-    })
-  });
+
+    for(let response of responses) {
+      console.log(`${response.url}: ${response.status}`);
+    }
+    return responses;
+  })
+
+  .then(responses => 
+    Promise.all(responses.map(data => data.json()))
+  )
+  
+  .then(users => users.forEach(
+                    user => {
+                      console.log(user.name);
+                      console.log(user.html_url);
+                    }
+                  )
+  );
+
+
+// Primer "then": Todas las respuestas son resueltas satisfactoriamente. Muestra 200 por cada url.
+
+// Segundo "then": Mapea el array de resultados dentro de un array de response.json() para leer sus contenidos.
+
+// Tercer "then": Todas las respuestas JSON son analizadas: "users" es el array de ellas
+
+
+// Fuente: https://es.javascript.info/promise-api
+ 
